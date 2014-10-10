@@ -1,5 +1,5 @@
-kd
-==
+KD::Tree
+========
 
 A Simple KD-Tree in C++
 
@@ -7,8 +7,8 @@ A Simple KD-Tree in C++
 ## Quickstart
 
 This is a minimal example, missing the necessary `#include`s and the boilerplate
-that defines the `Point` class.  The full working example can be found at `test/
-quickstart.cpp`.
+that defines the `Point` class.  The full working example can be found at
+`test/quickstart.cpp`.
 
 ```C++
 int main()
@@ -37,24 +37,33 @@ The KD-Tree exposes the following methods:
  - `void insert(const DataType& datum)`  
    Adds a datum to the tree.
    
- - `std::vector<DataType> find(const PointType& point, int max_count, CoordType max_radius)`  
-   Returns the `max_count` closest data to `point`, that lie within `max_radius`
-   units.  The results are sorted by increasing distance from `point`.
+ - `std::vector<DataType> find(const PointType& point, int count, CoordType radius)`  
+   Returns the `count` closest data that lie within `radius` units of `point`.
    
  - `DataType nearest(const PointType& point)`  
-   Returns the datum closest to `point`.  If no data are found, throws a
-   `std::underflow_error`.
+   Returns the datum closest to `point`.  If no data are found, this method
+   throws a `std::underflow_error`.
    
- - `std::vector<DataType> find(const PointType& point, int max_count)`  
-   Returns the nearest  `max_count` data to `point`.   The results are sorted by
-   increasing distance from `point`.
+ - `std::vector<DataType> find(const PointType& point, int count)`  
+   Returns the nearest `count` data to `point`.
    
- - `std::vector<DataType> find(const PointType& point, CoordType max_radius)`
-   Returns all data within `max_radius` units of `point`. The results are sorted
-   by increasing distance from `point`.
+ - `std::vector<DataType> find(const PointType& point, CoordType radius)`
+   Returns all data within `radius` units of `point`.
    
  - `void remove(const DataType& datum)`  
    Removes a datum from the tree.
+
+Some notes on the above:
+
+ - If `count` is given as an argument,  the result vector will contain _at most_
+   `count` data.   It may contain fewer - or even none - if there are not enough
+   data that match the search criteria.
+   
+ - When results are returned as a `std::vector<DataType>`, that vector is sorted
+   by increasing distance from the search point.
+   
+ - Data are returned _by value_, not by reference.  As such, the KD-Tree is best
+   used not as a primary storage mechanism, but as an index onto existing data.
 
 
 ## Configuration
@@ -88,6 +97,7 @@ struct CORE
 };
 ```
 
+
 ## Configuration Helpers
 
 Most uses don't need so much control.   For these cases, we provide a `KD::Core`
@@ -111,4 +121,3 @@ This can be used provided that:
    `PointType`), `DataType` must support the function `DataType:: point() const`
    to retrieve a `const PointType&`.
 
-### 

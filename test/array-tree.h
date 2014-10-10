@@ -22,13 +22,13 @@ namespace KD
 				// Nothing to do.
 			}
 	
-			std::vector<DataType> find(Finder<CORE>& finder)
+			std::vector<DataType> find(Finder<CORE>& finder) const
 			{
 				search(finder);
 				return finder.vector();
 			}
 	
-			std::vector<DataType> find(const PointType& point, int count, CoordType range)
+			std::vector<DataType> find(const PointType& point, int count, CoordType range) const
 			{
 				return find(Finder<CORE>(point, count, range));
 			}
@@ -63,7 +63,7 @@ namespace KD
 				}
 			}
 			
-			void search(Finder<CORE>& finder)
+			void search(Finder<CORE>& finder) const
 			{
 				for(int i = mItems.size() - 1; i >= 0; --i)
 				{

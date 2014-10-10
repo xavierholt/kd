@@ -68,13 +68,13 @@ public:
 	virtual Node* remove(const DataType& data)       = 0;
 	virtual void  search(Finder<CORE>& finder) const = 0;
 	
-	std::vector<DataType> find(Finder<CORE>& finder)
+	std::vector<DataType> find(Finder<CORE>& finder) const
 	{
 		search(finder);
 		return finder.vector();
 	}
 	
-	std::vector<DataType> find(const PointType& point, int count, CoordType range)
+	std::vector<DataType> find(const PointType& point, int count, CoordType range) const
 	{
 		return find(Finder<CORE>(point, count, range));
 	}

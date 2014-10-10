@@ -80,13 +80,13 @@ namespace KD
 				delete mNodes[1];
 			}
 	
-			std::vector<DataType> find(Finder<CORE>& finder)
+			std::vector<DataType> find(Finder<CORE>& finder) const
 			{
 				search(finder);
 				return finder.vector();
 			}
 	
-			std::vector<DataType> find(const PointType& point, int count, CoordType range)
+			std::vector<DataType> find(const PointType& point, int count, CoordType range) const
 			{
 				Finder<CORE> finder(point, count, range);
 				return find(finder);
@@ -150,7 +150,7 @@ namespace KD
 				return this;
 			}
 			
-			void search(Finder<CORE>& finder)
+			void search(Finder<CORE>& finder) const
 			{
 				for(int i = 0; i < mCount; ++i)
 				{

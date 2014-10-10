@@ -101,13 +101,13 @@ namespace KD
 				}
 			}
 	
-			std::vector<DataType> find(Finder<CORE>& finder)
+			std::vector<DataType> find(Finder<CORE>& finder) const
 			{
 				search(finder);
 				return finder.vector();
 			}
 	
-			std::vector<DataType> find(const PointType& point, int count, CoordType range)
+			std::vector<DataType> find(const PointType& point, int count, CoordType range) const
 			{
 				return find(Finder<CORE>(point, count, range));
 			}
@@ -182,7 +182,7 @@ namespace KD
 				return this;
 			}
 			
-			void search(Finder<CORE>& finder)
+			void search(Finder<CORE>& finder) const
 			{
 				if(mCount >= 0)
 				{
