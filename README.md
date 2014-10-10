@@ -44,10 +44,10 @@ The KD-Tree exposes the following methods:
    Returns the datum closest to `point`.  If no data are found, this method
    throws a `std::underflow_error`.
    
- - `std::vector<DataType> find(const PointType& point, int count)`  
+ - `std::vector<DataType> nearest(const PointType& point, int count)`  
    Returns the nearest `count` data to `point`.
    
- - `std::vector<DataType> find(const PointType& point, CoordType radius)`
+ - `std::vector<DataType> within(const PointType& point, CoordType radius)`
    Returns all data within `radius` units of `point`.
    
  - `void remove(const DataType& datum)`  
@@ -111,7 +111,7 @@ template <
     class CoordType  = double,
     int   STORAGE    = 32,
     int   MAX_DEPTH  = 32
-> class KD::Core {...};
+> struct KD::Core {...};
 ```
 
 This can be used provided that:
