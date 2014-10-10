@@ -1,43 +1,82 @@
-#include "../src/tree.h"
+#include "array-tree.h"
+#include "both-tree.h"
+#include "union-tree.h"
+#include "virtual-tree.h"
 
 #include <cstdlib>
-#include <cmath>
-#include <iostream>
+#include <cstdio>
 #include <time.h>
 
 inline long long int nanosec()
 {
 	timespec time;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time);
-	return ((long long int) 1000000000) * time.tv_sec + time.tv_nsec;
+	return 1000000000LL * time.tv_sec + time.tv_nsec;
 }
 
-union Point
+template <int DIM> struct TPoint
 {
-	float data[3];
-	struct
+public:
+	const static int N = DIM;
+	
+	static TPoint random()
 	{
-		float x;
-		float y;
-		float z;
-	};
+		TPoint result;
+		for(int i = 0; i < N; ++i)
+			result.data[i] = (float) rand() / RAND_MAX;
+		return result;
+	}
+	
+public:
+	float data[DIM];
+	
+public:
+	TPoint() {}
+	
+	TPoint(const TPoint& other)
+	{
+		for(int i = 0; i < N; ++i)
+		{
+			data[i] = other[i];
+		}
+	}
+	
+	TPoint(float value)
+	{
+		for(int i = 0; i < N; ++i)
+		{
+			data[i] = value;
+		}
+	}
+	
+	float operator [] (int index) const
+	{
+		return data[index];
+	}
 };
+
+typedef TPoint<2> Point;
 
 struct Thing
 {
 public:
-	static int next;
-	
-public:
 	int id;
-	Point point;
+	Point mPoint;
 	
-	Thing()
+	Thing(): mPoint(Point::random())
 	{
+		static int next = 0;
 		id = ++next;
-		point.x = ((float) rand()) / RAND_MAX;
-		point.y = ((float) rand()) / RAND_MAX;
-		point.z = ((float) rand()) / RAND_MAX;
+	}
+	
+	const Point& point() const
+	{
+		return mPoint;
+	}
+	
+	bool operator == (const Thing& other) const
+	{
+		return id == other.id;
 	}
 	
 	bool operator < (const Thing& other) const
@@ -46,124 +85,127 @@ public:
 	}
 };
 
-std::ostream& operator << (std::ostream& stream, const Point& point)
+void printline(const char* label, int matches, int queries, long long int insert, long long int search, long long int remove)
 {
-	return stream << '(' << point.x << ", " << point.y << ", " << point.z << ')';
+	double ims = double(insert) / 1000000;
+	double sms = double(search) / 1000000;
+	double rms = double(remove) / 1000000;
+	printf(" %-10s %7i / %-7i %14.6f %14.6f %14.6f\n", label, matches, queries, ims, sms, rms);
 }
 
-std::ostream& operator << (std::ostream& stream, const Thing& thing)
-{
-	return stream << "Thing " << thing.id << ' ' << thing.point;
-}
+typedef KD::Core<Point::N, Thing*, Point, float, 32, 64> CORE;
 
-int Thing::next = 0;
-
-struct CORE
+int main(int argc, char* argv[])
 {
-	typedef Thing* DataType;
-	typedef Point  PointType;
-	typedef float  UnitType;
+	int COUNT   = 100000;
+	int QUERIES = 10000;
+	int SEED    = time(0);
 	
-	const static int DIMENSIONS;
-	const static int STORAGE;
-	
-	static UnitType coordinate(const PointType& p, int axis)
+	if(argc == 2)
 	{
-		return p.data[axis];
+		SEED = atoi(argv[1]);
 	}
 	
-	static const PointType& point(const DataType& d)
+	printf("Seed:       %i\n", SEED);
+	printf("Objects:    %i\n", COUNT);
+	printf("Queries:    %i\n", QUERIES);
+	printf("Dimensions: %i\n", CORE::DIMENSIONS);
+	printf("Storage:    %i\n", CORE::STORAGE);
+	printf("Max Depth:  %i\n", CORE::MAX_DEPTH);
+	printf("\n");
+	srand(SEED);
+	
+	Thing*  things = new Thing[COUNT];
+	
+	Point min(0);
+	Point max(1);
+	KD::Array::Tree<CORE>   atree(min, max);
+	KD::Both::Tree<CORE>    btree(min, max);
+	KD::Union::Tree<CORE>   utree(min, max);
+	KD::Virtual::Tree<CORE> vtree(min, max);
+	
+	long long int ta = nanosec();
+	for(int i = 0; i < COUNT; ++i)
+		atree.insert(&things[i]);
+	long long int tb = nanosec();
+	for(int i = 0; i < COUNT; ++i)
+		btree.insert(&things[i]);
+	long long int tc = nanosec();
+	for(int i = 0; i < COUNT; ++i)
+		utree.insert(&things[i]);
+	long long int td = nanosec();
+	for(int i = 0; i < COUNT; ++i)
+		vtree.insert(&things[i]);
+	long long int te = nanosec();
+	
+	long long int ainit = tb - ta;
+	long long int binit = tc - tb;
+	long long int uinit = td - tc;
+	long long int vinit = te - td;
+	
+	int bmatch = 0;
+	int umatch = 0;
+	int vmatch = 0;
+	
+	long long int atime = 0;
+	long long int btime = 0;
+	long long int utime = 0;
+	long long int vtime = 0;
+	
+	for(int i = 0; i < QUERIES; ++i)
 	{
-		return d->point;
-	}
-};
-
-std::ostream& operator << (std::ostream& stream, const std::vector<Thing*>& vec)
-{
-	stream << "Vector: ";
-	std::vector<Thing*>::const_iterator i = vec.begin();
-	while(i != vec.end())
-	{
-		stream << " " << *i;
-		++i;
-	}
-	return stream;
-}
-const int CORE::DIMENSIONS = 3;
-const int CORE::STORAGE    = 8;
-
-int main()
-{
-	int seed = time(0);
-	std::cout << "Seed: " << seed << '\n';
-	srand(seed);
-	
-	const int N = 100000;
-	Thing  things[N];
-	Thing* tptrs[N];
-	
-	Point min;
-	min.x = 0;
-	min.y = 0;
-	min.z = 0;
-	
-	Point max;
-	max.x = 1;
-	max.y = 1;
-	max.z = 1;
-	
-	KDTree<CORE> kdtree(min, max);
-	for(int i = 0; i < N; ++i)
-	{
-		kdtree.insert(&things[i]);
-		tptrs[i] = &things[i];
-	}
-	
-	int trials  = 0;
-	int matches = 0;
-	
-	long long int kdt = 0;
-	long long int rat = 0;
-	
-	while(trials < 10000)
-	{
-		TFinder<CORE> kdf(things[trials].point, 20, 0.15);
-		TFinder<CORE> raf(things[trials].point, 20, 0.15);
+		Point testpoint(Point::random());
+		KD::Finder<CORE> afind(testpoint, 20, 0.15);
+		KD::Finder<CORE> bfind(testpoint, 20, 0.15);
+		KD::Finder<CORE> ufind(testpoint, 20, 0.15);
+		KD::Finder<CORE> vfind(testpoint, 20, 0.15);
 		
-		long long int ta = nanosec();
-		kdtree.find(kdf);
-		long long int tb = nanosec();
-		for(int i = N-1; i >= 0; --i)
-		{
-			raf.push(&tptrs[i]);
-		}
-		long long int tc = nanosec();
+		ta = nanosec();
+		atree.search(afind);
+		tb = nanosec();
+		btree.search(bfind);
+		tc = nanosec();
+		utree.search(ufind);
+		td = nanosec();
+		vtree.search(vfind);
+		te = nanosec();
 		
-		kdt += (tb - ta);
-		rat += (tc - tb);
+		atime += (tb - ta);
+		btime += (tc - tb);
+		utime += (td - tc);
+		vtime += (te - td);
 		
-		std::vector<Thing*> kd_results(kdf.vector());
-		std::vector<Thing*> ra_results(raf.vector());
-		if(kd_results == ra_results)
-		{
-			++matches;
-		}
-		++trials;
+		std::vector<Thing*> canon(afind.vector());
+		bmatch += (canon == bfind.vector());
+		umatch += (canon == ufind.vector());
+		vmatch += (canon == vfind.vector());
 	}
 	
-	std::cout << matches << " of " << trials << " succeeded.\n";
-	std::cout << "KD-Tree: ";
-	std::cout.width(12);
-	std::cout << kdt << " ns\n";
-	std::cout << "Array:   ";
-	std::cout.width(12);
-	std::cout << rat << " ns\n";
+	ta = nanosec();
+	for(int i = 0; i < COUNT; ++i)
+		atree.remove(&things[i]);
+	tb = nanosec();
+	for(int i = 0; i < COUNT; ++i)
+		btree.remove(&things[i]);
+	tc = nanosec();
+	for(int i = 0; i < COUNT; ++i)
+		utree.remove(&things[i]);
+	td = nanosec();
+	for(int i = 0; i < COUNT; ++i)
+		vtree.remove(&things[i]);
+	te = nanosec();
 	
-	for(int i = 0; i < N; ++i)
-	{
-		kdtree.remove(&things[i]);
-	}
+	long long int adele = tb - ta;
+	long long int bdele = tc - tb;
+	long long int udele = td - tc;
+	long long int vdele = te - td;
 	
+	printf("            Matches / Queries      Init (ms)    Search (ms)    Delete (ms)\n");
+	printf("----------+-------------------+--------------+--------------+--------------\n");
+	printline("Array",   QUERIES, QUERIES, ainit, atime, adele);
+	printline("Both",    bmatch,  QUERIES, binit, btime, bdele);
+	printline("Union",   umatch,  QUERIES, uinit, utime, udele);
+	printline("Virtual", vmatch,  QUERIES, vinit, vtime, vdele);
 	return 0;
 }
 
