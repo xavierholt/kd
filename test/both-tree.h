@@ -116,7 +116,8 @@ namespace KD
 	
 			std::vector<DataType> nearest(const PointType& point, int count) const
 			{
-				return find(Finder<CORE>::byCount(point, count));
+				Finder<CORE> finder = Finder<CORE>::byCount(point, count);
+				return find(finder);
 			}
 			
 			Tree* remove(const DataType& data)
@@ -173,7 +174,8 @@ namespace KD
 			
 			std::vector<DataType> within(const PointType& point, CoordType range) const
 			{
-				return find(Finder<CORE>::byRange(point, range));
+				Finder<CORE> finder = Finder<CORE>::byRange(point, range);
+				return find(finder);
 			}
 		};
 	}

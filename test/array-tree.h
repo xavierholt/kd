@@ -30,7 +30,8 @@ namespace KD
 	
 			std::vector<DataType> find(const PointType& point, int count, CoordType range) const
 			{
-				return find(Finder<CORE>(point, count, range));
+				Finder<CORE> finder = Finder<CORE>(point, count, range);
+				return find(finder);
 			}
 	
 			void insert(const DataType& data)
@@ -47,7 +48,8 @@ namespace KD
 			
 			std::vector<DataType> nearest(const PointType& point, int count) const
 			{
-				return find(Finder<CORE>::byCount(point, count));
+				Finder<CORE> finder = Finder<CORE>::byCount(point, count);
+				return find(finder);
 			}
 	
 			void remove(const DataType& data)
@@ -73,7 +75,8 @@ namespace KD
 	
 			std::vector<DataType> within(const PointType& point, CoordType range) const
 			{
-				return find(Finder<CORE>::byRange(point, range));
+				Finder<CORE> finder = Finder<CORE>::byRange(point, range);
+				return find(finder);
 			}
 		};
 	}
