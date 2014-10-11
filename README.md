@@ -1,14 +1,13 @@
 KD::Tree
 ========
 
-A Simple KD-Tree in C++
+A [KD-Tree](https://en.wikipedia.org/wiki/Kd-tree) in C++
 
 
 ## Quickstart
 
 This is a minimal example, missing the necessary `#include`s and the boilerplate
-that defines the `Point` class.  The full working example can be found at
-`test/quickstart.cpp`.
+`Point` class.  The full working example can be found at `test/quickstart.cpp`.
 
 ```C++
 int main()
@@ -47,7 +46,7 @@ The KD-Tree exposes the following methods:
  - `std::vector<DataType> nearest(const PointType& point, int count)`  
    Returns the nearest `count` data to `point`.
    
- - `std::vector<DataType> within(const PointType& point, CoordType radius)`
+ - `std::vector<DataType> within(const PointType& point, CoordType radius)`  
    Returns all data within `radius` units of `point`.
    
  - `void remove(const DataType& datum)`  
@@ -118,6 +117,6 @@ This can be used provided that:
  - `PointType` has a valid  `PointType::operator [] (int) const`  that returns a
    value that can be implicily converted to a `CoordType`.
  - If `PointType` differs from `DataType`  (and `DataType` is not a pointer to a
-   `PointType`), `DataType` must support the function `DataType:: point() const`
+   `PointType`),  `DataType` must support the function `DataType::point() const`
    to retrieve a `const PointType&`.
 
