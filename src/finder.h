@@ -108,7 +108,7 @@ namespace KD
 		{
 			mCount    = 0;
 			mMaxCount = count;
-			mCapacity = std::min(100, mMaxCount + 1);
+			mCapacity = std::min(99, mMaxCount) + 1;
 			mQueue    = new Stat[mCapacity];
 			mRange    = range * range;
 			mMaxRange = mRange;
