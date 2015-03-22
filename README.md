@@ -115,10 +115,10 @@ template <
 
 It can be used as long as the following functions are available:
 
- - `Coord Point::operator[] (int axis) const`
+ - `Coord Point::operator[] (int axis) const`  
    To extract a coordinate from a point.
 
- - `const Point& Item::point() const`
+ - `const Point& Item::point() const`  
    To extract the position of an item.  This function is only required if `Item`
    is neither the same type as `Point` nor a pointer to `Point`.
 
@@ -128,16 +128,16 @@ It can be used as long as the following functions are available:
 Internally, a KD-Tree node can be one of three subtypes of the polymorphic
 `KD::Node`:
 
- - `KD::Tree`
+ - `KD::Tree`  
    A node that stores no data.  It simply dispatches method calls to the nodes
    beneath it.
 
- - `KD::Twig`
+ - `KD::Twig`  
    A leaf node that is above `CORE::MAX_DEPTH`.  A twig node can store up to
    `CORE::STORAGE` items, but further insertions will cause it to split,
    becoming a tree node with new storage nodes beneath it.
 
- - `KD::Leaf`
+ - `KD::Leaf`  
    A permanent leaf node - one at `CORE::MAX_DEPTH`.  A leaf node can hold any
    number of items.  It begins with a capacity of `CORE::STORAGE`, and increases
    its capacity by `CORE::STORAGE` whenever it would overflow.
