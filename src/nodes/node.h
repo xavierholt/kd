@@ -5,8 +5,6 @@ protected:
 	typedef typename CORE::Point Point;
 	typedef typename CORE::Coord Coord;
 	
-	typedef Finder<Item, Coord> Finder;
-	
 protected:
 	const int mDepth;
 	const int mAxis;
@@ -83,9 +81,9 @@ public:
 	virtual Node* insert(const Item& item) = 0;
 	virtual Node* remove(const Item& item) = 0;
 	
-	virtual void  search(const Point& point, Finder& finder) const = 0;
+	virtual void  search(const Point& point, Finder<Item, Coord>& finder) const = 0;
 	
-	std::vector<Item> find(const Point& point, Finder& finder) const
+	std::vector<Item> find(const Point& point, Finder<Item, Coord>& finder) const
 	{
 		search(point, finder);
 		return finder.vector();
@@ -93,27 +91,24 @@ public:
 	
 	std::vector<Item> find(const Point& point, int count, Coord score) const
 	{
-		Finder finder = Finder(count, score);
-		return find(point, finder);
+		return find(point, Finder<Item, Coord>(count, score));
 	}
 	
 	Item nearest(const Point& point) const
 	{
-		Finder finder = Finder::byCount(1);
+		Finder<Item, Coord> finder = Finder<Item, Coord>::byCount(1);
 		search(point, finder);
 		return finder.top();
 	}
 	
 	std::vector<Item> nearest(const Point& point, int count) const
 	{
-		Finder finder = Finder::byCount(count);
-		return find(point, finder);
+		return find(point, Finder<Item, Coord>::byCount(count));
 	}
 	
 	std::vector<Item> within(const Point& point, Coord score) const
 	{
-		Finder finder = Finder::byScore(score);
-		return find(point, finder);
+		return find(point, Finder<Item, Coord>::byScore(score));
 	}
 };
 
