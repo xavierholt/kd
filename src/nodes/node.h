@@ -1,15 +1,18 @@
 template <class CORE> class Node
 {
-	typedef typename CORE::DataType  DataType;
-	typedef typename CORE::PointType PointType;
-	typedef typename CORE::CoordType CoordType;
+protected:
+	typedef typename CORE::Item  Item;
+	typedef typename CORE::Point Point;
+	typedef typename CORE::Coord Coord;
+	
+	typedef Finder<Item, Coord> Finder;
 	
 protected:
 	const int mDepth;
 	const int mAxis;
-	CoordType mMidpoint;
-	CoordType mMinima[CORE::DIMENSIONS];
-	CoordType mMaxima[CORE::DIMENSIONS];
+	Coord     mMidpoint;
+	Coord     mMinima[CORE::DIMENSIONS];
+	Coord     mMaxima[CORE::DIMENSIONS];
 	
 protected:
 	Node(const Twig<CORE>* tofork):
@@ -25,7 +28,7 @@ protected:
 		}
 	}
 	
-	Node(const Tree<CORE>* parent, const DataType& data):
+	Node(const Tree<CORE>* parent, const Item& item):
 		mDepth(parent->mDepth + 1),
 		mAxis(mDepth % CORE::DIMENSIONS)
 	{
@@ -35,7 +38,7 @@ protected:
 			mMaxima[i] = parent->mMaxima[i];
 		}
 		
-		if(CORE::coordinate(CORE::point(data), parent->mAxis) < parent->mMidpoint)
+		if(CORE::coordinate(CORE::point(item), parent->mAxis) < parent->mMidpoint)
 		{
 			mMaxima[parent->mAxis] = parent->mMidpoint;
 		}
@@ -47,7 +50,7 @@ protected:
 		mMidpoint = (mMinima[mAxis] + mMaxima[mAxis]) / 2;
 	}
 	
-	Node(const PointType& min, const PointType& max): mDepth(0), mAxis(0)
+	Node(const Point& min, const Point& max): mDepth(0), mAxis(0)
 	{
 		for(int i = 0; i < CORE::DIMENSIONS; ++i)
 		{
@@ -58,45 +61,59 @@ protected:
 		mMidpoint = (mMinima[mAxis] + mMaxima[mAxis]) / 2;
 	}
 	
+	static Coord score(const Point& point, Item item)
+	{
+		Coord result(0);
+		for(int i = 0; i < CORE::DIMENSIONS; ++i)
+		{
+			Coord pc = CORE::coordinate(CORE::point(item), i);
+			Coord ic = CORE::coordinate(point, i);
+			result  += (pc - ic) * (pc - ic);
+		}
+		
+		return result;
+	}
+	
 public:
 	virtual ~Node()
 	{
 		// Nothing to do.
 	}
 	
-	virtual Node* insert(const DataType& data)       = 0;
-	virtual Node* remove(const DataType& data)       = 0;
-	virtual void  search(Finder<CORE>& finder) const = 0;
+	virtual Node* insert(const Item& item) = 0;
+	virtual Node* remove(const Item& item) = 0;
 	
-	std::vector<DataType> find(Finder<CORE>& finder) const
+	virtual void  search(const Point& point, Finder& finder) const = 0;
+	
+	std::vector<Item> find(const Point& point, Finder& finder) const
 	{
-		search(finder);
+		search(point, finder);
 		return finder.vector();
 	}
 	
-	std::vector<DataType> find(const PointType& point, int count, CoordType range) const
+	std::vector<Item> find(const Point& point, int count, Coord score) const
 	{
-		Finder<CORE> finder = Finder<CORE>(point, count, range);
-		return find(finder);
+		Finder finder = Finder(count, score);
+		return find(point, finder);
 	}
 	
-	DataType nearest(const PointType& point) const
+	Item nearest(const Point& point) const
 	{
-		Finder<CORE> finder = Finder<CORE>::byCount(point, 1);
-		search(finder);
+		Finder finder = Finder::byCount(1);
+		search(point, finder);
 		return finder.top();
 	}
 	
-	std::vector<DataType> nearest(const PointType& point, int count) const
+	std::vector<Item> nearest(const Point& point, int count) const
 	{
-		Finder<CORE> finder = Finder<CORE>::byCount(point, count);
-		return find(finder);
+		Finder finder = Finder::byCount(count);
+		return find(point, finder);
 	}
 	
-	std::vector<DataType> within(const PointType& point, CoordType range) const
+	std::vector<Item> within(const Point& point, Coord score) const
 	{
-		Finder<CORE> finder = Finder<CORE>::byRange(point, range);
-		return find(finder);
+		Finder finder = Finder::byScore(score);
+		return find(point, finder);
 	}
 };
 

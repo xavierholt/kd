@@ -14,21 +14,25 @@ inline long long int nanosec()
 	return 1000000000LL * time.tv_sec + time.tv_nsec;
 }
 
-template <int DIM> struct TPoint
+template <int DIM, class T> struct TPoint
 {
 public:
+	typedef T Coord;
 	const static int N = DIM;
 	
 	static TPoint random()
 	{
 		TPoint result;
 		for(int i = 0; i < N; ++i)
-			result.data[i] = (float) rand() / RAND_MAX;
+		{
+			result.data[i] = (T) rand() / RAND_MAX;
+		}
+		
 		return result;
 	}
 	
 public:
-	float data[DIM];
+	T data[DIM];
 	
 public:
 	TPoint() {}
@@ -41,7 +45,7 @@ public:
 		}
 	}
 	
-	TPoint(float value)
+	TPoint(T value)
 	{
 		for(int i = 0; i < N; ++i)
 		{
@@ -49,13 +53,13 @@ public:
 		}
 	}
 	
-	float operator [] (int index) const
+	T operator [] (int index) const
 	{
 		return data[index];
 	}
 };
 
-typedef TPoint<2> Point;
+typedef TPoint<3, float> Point;
 
 struct Thing
 {
@@ -85,6 +89,8 @@ public:
 	}
 };
 
+typedef Finder<Thing*, Point::Coord> ThingFinder;
+
 void printline(const char* label, int matches, int queries, long long int insert, long long int search, long long int remove)
 {
 	double ims = double(insert) / 1000000;
@@ -93,7 +99,7 @@ void printline(const char* label, int matches, int queries, long long int insert
 	printf(" %-10s %7i / %-7i %14.6f %14.6f %14.6f\n", label, matches, queries, ims, sms, rms);
 }
 
-typedef KD::Core<Point::N, Thing*, Point, float, 32, 64> CORE;
+typedef KD::Core<Point::N, Thing*, Point, Point::Coord, 32, 64> CORE;
 
 int main(int argc, char* argv[])
 {
@@ -155,19 +161,19 @@ int main(int argc, char* argv[])
 	for(int i = 0; i < QUERIES; ++i)
 	{
 		Point testpoint(Point::random());
-		KD::Finder<CORE> afind(testpoint, 20, 0.15);
-		KD::Finder<CORE> bfind(testpoint, 20, 0.15);
-		KD::Finder<CORE> ufind(testpoint, 20, 0.15);
-		KD::Finder<CORE> vfind(testpoint, 20, 0.15);
+		ThingFinder afind(20, 0.15);
+		ThingFinder bfind(20, 0.15);
+		ThingFinder ufind(20, 0.15);
+		ThingFinder vfind(20, 0.15);
 		
 		ta = nanosec();
-		atree.search(afind);
+		atree.search(testpoint, afind);
 		tb = nanosec();
-		btree.search(bfind);
+		btree.search(testpoint, bfind);
 		tc = nanosec();
-		utree.search(ufind);
+		utree.search(testpoint, ufind);
 		td = nanosec();
-		vtree.search(vfind);
+		vtree.search(testpoint, vfind);
 		te = nanosec();
 		
 		atime += (tb - ta);

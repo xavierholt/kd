@@ -7,7 +7,6 @@
 namespace KD
 {
 	#include "nodes/all.h"
-
 }
 
 #endif

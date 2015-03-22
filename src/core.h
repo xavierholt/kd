@@ -5,9 +5,9 @@ namespace KD
 {
 	template <int DIM, class DT, class PT, class CT, int STO, int DEP> struct CoreBase
 	{
-		typedef DT DataType;
-		typedef PT PointType;
-		typedef CT CoordType;
+		typedef DT Item;
+		typedef PT Point;
+		typedef CT Coord;
 	
 		static const int DIMENSIONS = DIM;
 		static const int MAX_DEPTH  = DEP;

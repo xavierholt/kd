@@ -1,24 +1,24 @@
 template <class CORE> class Leaf : public Node<CORE>
 {
-	typedef typename CORE::DataType  DataType;
-	typedef typename CORE::PointType PointType;
-	typedef typename CORE::CoordType CoordType;
+	typedef typename CORE::Item  Item;
+	typedef typename CORE::Point Point;
+	typedef typename CORE::Coord Coord;
 	
 	friend class Tree<CORE>;
 	friend class Twig<CORE>;
 	
 protected:
-	int       mCount;
-	int       mCapacity;
-	DataType* mItems;
+	int   mCount;
+	int   mCapacity;
+	Item* mItems;
 	
 protected:
-	Leaf(const Tree<CORE>* parent, const DataType& data): Node<CORE>(parent, data)
+	Leaf(const Tree<CORE>* parent, const Item& item): Node<CORE>(parent, item)
 	{
 		mCount    = 1;
 		mCapacity = CORE::STORAGE;
-		mItems    = new DataType[mCapacity];
-		mItems[0] = data;
+		mItems    = new Item[mCapacity];
+		mItems[0] = item;
 	}
 	
 public:
@@ -27,12 +27,12 @@ public:
 		delete [] mItems;
 	}
 	
-	Node<CORE>* insert(const DataType& data)
+	Node<CORE>* insert(const Item& item)
 	{
 		if(mCount >= CORE::STORAGE)
 		{
 			mCapacity += CORE::STORAGE;
-			DataType* temp = new DataType[mCapacity];
+			Item* temp = new Item[mCapacity];
 			for(int i = 0; i < mCount; ++i)
 			{
 				temp[i] = mItems[i];
@@ -42,37 +42,40 @@ public:
 			mItems = temp;
 		}
 		
-		mItems[mCount] = data;
+		mItems[mCount] = item;
 		mCount += 1;
 		return this;
 	}
 	
-	Node<CORE>* remove(const DataType& data)
+	Node<CORE>* remove(const Item& item)
 	{
 		for(int i = 0; i < mCount; ++i)
 		{
-			if(mItems[i] == data)
+			if(mItems[i] == item)
 			{
-				mCount = mCount - 1;
-				mItems[i] = mItems[mCount];
-				break;
+				mCount -= 1;
+				if(mCount == 0)
+				{
+					delete this;
+					return 0;
+				}
+				else
+				{
+					mItems[i] = mItems[mCount];
+					return this;
+				}
 			}
-		}
-		
-		if(mCount == 0)
-		{
-			delete this;
-			return 0;
 		}
 		
 		return this;
 	}
 	
-	void search(Finder<CORE>& finder) const
+	void search(const Point& point, Finder<Item, Coord>& finder) const
 	{
 		for(int i = 0; i < mCount; ++i)
 		{
-			finder.check(&mItems[i]);
+			Coord score = this->score(point, mItems[i]);
+			finder.check(mItems[i], score);
 		}
 	}
 };

@@ -9,28 +9,28 @@ namespace KD
 	{
 		template <typename CORE> class Tree
 		{
-			typedef typename CORE::DataType  DataType;
-			typedef typename CORE::PointType PointType;
-			typedef typename CORE::CoordType CoordType;
+			typedef typename CORE::Item  Item;
+			typedef typename CORE::Point Point;
+			typedef typename CORE::Coord Coord;
 			
 		protected:
 			const int mDepth;
 			const int mAxis;
 			int       mCount;
-			CoordType mMidpoint;
-			CoordType mMinima[CORE::DIMENSIONS];
-			CoordType mMaxima[CORE::DIMENSIONS];
+			Coord     mMidpoint;
+			Coord     mMinima[CORE::DIMENSIONS];
+			Coord     mMaxima[CORE::DIMENSIONS];
 	
 			Tree*     mNodes[2];
-			DataType  mItems[CORE::STORAGE];
+			Item      mItems[CORE::STORAGE];
 	
 		protected:
-			Tree(const Tree* parent, const DataType& data):
+			Tree(const Tree* parent, const Item& item):
 				mDepth(parent->mDepth + 1),
 				mAxis(mDepth % CORE::DIMENSIONS)
 			{
 				mCount    = 1;
-				mItems[0] = data;
+				mItems[0] = item;
 				mNodes[0] = 0;
 				mNodes[1] = 0;
 		
@@ -41,7 +41,7 @@ namespace KD
 				}
 		
 				int pax = parent->mAxis;
-				if(CORE::coordinate(CORE::point(data), pax) > parent->mMidpoint)
+				if(CORE::coordinate(CORE::point(item), pax) > parent->mMidpoint)
 				{
 					mMinima[pax] = parent->mMidpoint;
 				}
@@ -53,13 +53,13 @@ namespace KD
 				mMidpoint = (mMinima[mAxis] + mMaxima[mAxis]) / 2;
 			}
 			
-			int child(const PointType& point) const
+			int child(const Point& point) const
 			{
 				return (CORE::coordinate(point, mAxis) > mMidpoint);
 			}
 	
 		public:
-			Tree(const PointType& min, const PointType& max): mDepth(0), mAxis(0)
+			Tree(const Point& min, const Point& max): mDepth(0), mAxis(0)
 			{
 				mCount    = 0;
 				mNodes[0] = 0;
@@ -80,52 +80,27 @@ namespace KD
 				delete mNodes[1];
 			}
 	
-			std::vector<DataType> find(Finder<CORE>& finder) const
-			{
-				search(finder);
-				return finder.vector();
-			}
-	
-			std::vector<DataType> find(const PointType& point, int count, CoordType range) const
-			{
-				Finder<CORE> finder(point, count, range);
-				return find(finder);
-			}
-	
-			void insert(const DataType& data)
+			void insert(const Item& item)
 			{
 				if(mCount >= CORE::STORAGE)
 				{
-					int c = child(CORE::point(data));
-					if(mNodes[c]) mNodes[c]->insert(data);
-					else mNodes[c] = new Tree(this, data);
+					int c = child(CORE::point(item));
+					if(mNodes[c]) mNodes[c]->insert(item);
+					else mNodes[c] = new Tree(this, item);
 				}
 				else
 				{
-					mItems[mCount] = data;
+					mItems[mCount] = item;
 					mCount += 1;
 				}
 			}
 	
-			DataType nearest(const PointType& point) const
-			{
-				Finder<CORE> finder = Finder<CORE>::byCount(point, 1);
-				find(finder);
-				return finder.top();
-			}
-	
-			std::vector<DataType> nearest(const PointType& point, int count) const
-			{
-				Finder<CORE> finder = Finder<CORE>::byCount(point, count);
-				return find(finder);
-			}
-			
-			Tree* remove(const DataType& data)
+			Tree* remove(const Item& item)
 			{
 				int i;
 				for(i = 0; i < mCount; ++i)
 				{
-					if(mItems[i] == data)
+					if(mItems[i] == item)
 					{
 						mCount = mCount - 1;
 						if(i < mCount)
@@ -138,8 +113,8 @@ namespace KD
 		
 				if(i == mCount)
 				{
-					Tree*& n = mNodes[child(CORE::point(data))];
-					if(n) n = n->remove(data);
+					Tree*& n = mNodes[child(CORE::point(item))];
+					if(n) n = n->remove(item);
 				}
 		
 				if(mCount == 0 && mNodes[0] == 0 && mNodes[1] == 0 && mDepth != 0)
@@ -151,31 +126,33 @@ namespace KD
 				return this;
 			}
 			
-			void search(Finder<CORE>& finder) const
+			void search(const Point& point, Finder<Item, Coord>& finder) const
 			{
-				for(int i = 0; i < mCount; ++i)
+				for(int i = mCount - 1; i >= 0; --i)
 				{
-					finder.check(&mItems[i]);
+					Coord score(0);
+					for(int d = 0; d < CORE::DIMENSIONS; ++d)
+					{
+						Coord pc = CORE::coordinate(point, d);
+						Coord ic = CORE::coordinate(CORE::point(mItems[i]), d);
+						score += (pc - ic) * (pc - ic);
+					}
+					
+					finder.check(mItems[i], score);
 				}
 		
-				CoordType diff = finder.coordinate(mAxis) - mMidpoint;
+				Coord diff = CORE::coordinate(point, mAxis) - mMidpoint;
 				int idx = (diff > 0);
 		
 				if(mNodes[idx])
 				{
-					mNodes[idx]->search(finder);
+					mNodes[idx]->search(point, finder);
 				}
 		
-				if(diff * diff < finder.rangeSquared() && mNodes[idx ^ 1])
+				if(diff * diff < finder.score() && mNodes[idx ^ 1])
 				{
-					mNodes[idx ^ 1]->search(finder);
+					mNodes[idx ^ 1]->search(point, finder);
 				}
-			}
-			
-			std::vector<DataType> within(const PointType& point, CoordType range) const
-			{
-				Finder<CORE> finder = Finder<CORE>::byRange(point, range);
-				return find(finder);
 			}
 		};
 	}

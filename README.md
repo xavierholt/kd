@@ -33,36 +33,36 @@ int main()
 
 The KD-Tree exposes the following methods:
 
- - `void insert(const DataType& datum)`  
-   Adds a datum to the tree.
+ - `void insert(const Item& datum)`  
+   Adds an item to the tree.
    
- - `std::vector<DataType> find(const PointType& point, int count, CoordType radius)`  
-   Returns the `count` closest data that lie within `radius` units of `point`.
+ - `std::vector<Item> find(const Point& point, int count, Coord radius)`  
+   Returns the `count` closest items that lie within `radius` units of `point`.
    
- - `DataType nearest(const PointType& point)`  
-   Returns the datum closest to `point`.  If no data are found, this method
+ - `Item nearest(const Point& point)`  
+   Returns the item closest to `point`.  If no items are found, this method
    throws a `std::underflow_error`.
    
- - `std::vector<DataType> nearest(const PointType& point, int count)`  
-   Returns the nearest `count` data to `point`.
+ - `std::vector<Item> nearest(const Point& point, int count)`  
+   Returns the nearest `count` items to `point`.
    
- - `std::vector<DataType> within(const PointType& point, CoordType radius)`  
-   Returns all data within `radius` units of `point`.
+ - `std::vector<Item> within(const Point& point, Coord radius)`  
+   Returns all items within `radius` units of `point`.
    
- - `void remove(const DataType& datum)`  
-   Removes a datum from the tree.
+ - `void remove(const Item& datum)`  
+   Removes an item from the tree.
+
 
 Some notes on the above:
 
- - If `count` is given as an argument,  the result vector will contain _at most_
-   `count` data.   It may contain fewer - or even none - if there are not enough
-   data that match the search criteria.
+ - If `count` is given as an argument, the result vector may contain fewer items
+   if there are not enough that match the search criteria.
    
- - When results are returned as a `std::vector<DataType>`, that vector is sorted
-   by increasing distance from the search point.
+ - When results are returned as a `std::vector<Item>`, that vector is sorted by
+   increasing distance from the search point.
    
- - Data are returned _by value_, not by reference.  As such, the KD-Tree is best
-   used not as a primary storage mechanism, but as an index onto existing data.
+ - Items are passed around by value, not by reference.  As such, the KD-Tree is
+   best suited for storing pointers, acting as an index onto existing data.
 
 
 ## Configuration
@@ -74,24 +74,24 @@ members to fine-tune the tree's behaviour.  An annotated example:
 ```C++
 struct CORE
 {
-	typedef Thing DataType;  // The type we store in the tree.
-	typedef Point PointType; // The type we read coordinates from.
-	typedef float CoordType; // The type we store coordinates as internally.
+	typedef Thing* Item;  // The type we store in the tree.
+	typedef Point  Point; // The type we read coordinates from.
+	typedef float  Coord; // The type of individual coordinates.
 	
 	static const int DIMENSIONS =  3; // We're in a three-dimensional space.
-	static const int MAX_DEPTH  = 10; // Caps the depth of the tree.
-	static const int STORAGE    =  8; // Initial storage space in leaf nodes.
+	static const int MAX_DEPTH  = 10; // The tree will reach at most ten levels.
+	static const int STORAGE    =  8; // Leaves can hold eight items before splitting.
 	
 	// Get the distance of a point along the given axis.
-	static CoordType coordinate(const PointType& point, int axis)
+	static Coord coordinate(const Point& point, int axis)
 	{
 		return point[axis];
 	}
 	
 	// Get the location of a datum.
-	static const PointType& point(const DataType& datum)
+	static const Point& point(const Item& item)
 	{
-		return datum->point();
+		return item->point();
 	}
 };
 ```
@@ -99,24 +99,60 @@ struct CORE
 
 ## Configuration Helpers
 
-Most uses don't need so much control.   For these cases, we provide a `KD::Core`
+Most uses don't need so much control.  For these cases, we provide a `KD::Core`
 template class equivalent to:
 
 ```C++
 template <
     int   DIMENSIONS,
-    class DataType,
-    class PointType  = DataType,
-    class CoordType  = double,
-    int   STORAGE    = 32,
+    class Item,
+    class Point      = Item,
+    class Coord      = double,
+    int   STORAGE    = 8,
     int   MAX_DEPTH  = 32
 > struct KD::Core {...};
 ```
 
-This can be used provided that:
- - `PointType` has a valid  `PointType::operator [] (int) const`  that returns a
-   value that can be implicily converted to a `CoordType`.
- - If `PointType` differs from `DataType`  (and `DataType` is not a pointer to a
-   `PointType`),  `DataType` must support the function `DataType::point() const`
-   to retrieve a `const PointType&`.
+It can be used as long as the following functions are available:
+
+ - `Coord Point::operator[] (int axis) const`
+   To extract a coordinate from a point.
+
+ - `const Point& Item::point() const`
+   To extract the position of an item.  This function is only required if `Item`
+   is neither the same type as `Point` nor a pointer to `Point`.
+
+
+## Implementation Details
+
+Internally, a KD-Tree node can be one of three subtypes of the polymorphic
+`KD::Node`:
+
+ - `KD::Tree`
+   A node that stores no data.  It simply dispatches method calls to the nodes
+   beneath it.
+
+ - `KD::Twig`
+   A leaf node that is above `CORE::MAX_DEPTH`.  A twig node can store up to
+   `CORE::STORAGE` items, but further insertions will cause it to split,
+   becoming a tree node with new storage nodes beneath it.
+
+ - `KD::Leaf`
+   A permanent leaf node - one at `CORE::MAX_DEPTH`.  A leaf node can hold any
+   number of items.  It begins with a capacity of `CORE::STORAGE`, and increases
+   its capacity by `CORE::STORAGE` whenever it would overflow.
+
+
+Note that unlike the canonical KD-Tree, this version stores items only in leaf
+(and twig) nodes.  This costs a little extra storage space, but allows for some
+nice simplifications:
+
+ - At each split, the space is divided exactly in half along the appropriate
+   axis, regardless of the positions of any items.  Oddly placed items cannot
+   unbalance the tree.
+
+ - Deletion is much simpler (and should be faster) for the same reason: removing
+   an item doesn't affect the division of the space, so the tree doesn't need to
+   be rebalanced.
+
 

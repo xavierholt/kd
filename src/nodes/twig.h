@@ -1,25 +1,25 @@
 template <class CORE> class Twig : public Node<CORE>
 {
-	typedef typename CORE::DataType  DataType;
-	typedef typename CORE::PointType PointType;
-	typedef typename CORE::CoordType CoordType;
+	typedef typename CORE::Item  Item;
+	typedef typename CORE::Point Point;
+	typedef typename CORE::Coord Coord;
 	
 	friend class Leaf<CORE>;
 	friend class Tree<CORE>;
 	
 protected:
-	int      mCount;
-	DataType mItems[CORE::STORAGE];
+	int  mCount;
+	Item mItems[CORE::STORAGE];
 	
 protected:
-	Twig(const Tree<CORE>* parent, const DataType& data): Node<CORE>(parent, data)
+	Twig(const Tree<CORE>* parent, const Item& item): Node<CORE>(parent, item)
 	{
 		mCount    = 1;
-		mItems[0] = data;
+		mItems[0] = item;
 	}
 	
 public:
-	Node<CORE>* insert(const DataType& data)
+	Node<CORE>* insert(const Item& item)
 	{
 		if(mCount >= CORE::STORAGE)
 		{
@@ -29,44 +29,47 @@ public:
 				ret->insert(mItems[i]);
 			}
 			
-			ret->insert(data);
+			ret->insert(item);
 			delete this;
 			return ret;
 		}
 		else
 		{
-			mItems[mCount] = data;
+			mItems[mCount] = item;
 			mCount += 1;
 			return this;
 		}
 	}
 	
-	Node<CORE>* remove(const DataType& data)
+	Node<CORE>* remove(const Item& item)
 	{
 		for(int i = 0; i < mCount; ++i)
 		{
-			if(mItems[i] == data)
+			if(mItems[i] == item)
 			{
 				mCount -= 1;
-				mItems[i] = mItems[mCount];
-				break;
+				if(mCount == 0)
+				{
+					delete this;
+					return 0;
+				}
+				else
+				{
+					mItems[i] = mItems[mCount];
+					return this;
+				}
 			}
-		}
-		
-		if(mCount == 0)
-		{
-			delete this;
-			return 0;
 		}
 		
 		return this;
 	}
 	
-	void search(Finder<CORE>& finder) const
+	void search(const Point& point, Finder<Item, Coord>& finder) const
 	{
 		for(int i = 0; i < mCount; ++i)
 		{
-			finder.check(&mItems[i]);
+			Coord score = this->score(point, mItems[i]);
+			finder.check(mItems[i], score);
 		}
 	}
 };

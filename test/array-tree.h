@@ -9,54 +9,29 @@ namespace KD
 	{
 		template <typename CORE> class Tree
 		{
-			typedef typename CORE::DataType  DataType;
-			typedef typename CORE::PointType PointType;
-			typedef typename CORE::CoordType CoordType;
-	
+			typedef typename CORE::Item  Item;
+			typedef typename CORE::Point Point;
+			typedef typename CORE::Coord Coord;
+			
 		protected:
-			std::vector<DataType> mItems;
+			std::vector<Item> mItems;
 	
 		public:
-			Tree(const PointType&, const PointType&)
+			Tree(const Point&, const Point&)
 			{
 				// Nothing to do.
 			}
 	
-			std::vector<DataType> find(Finder<CORE>& finder) const
+			void insert(const Item& item)
 			{
-				search(finder);
-				return finder.vector();
-			}
-	
-			std::vector<DataType> find(const PointType& point, int count, CoordType range) const
-			{
-				Finder<CORE> finder = Finder<CORE>(point, count, range);
-				return find(finder);
-			}
-	
-			void insert(const DataType& data)
-			{
-				mItems.push_back(data);
+				mItems.push_back(item);
 			}
 			
-			DataType nearest(const PointType& point) const
-			{
-				Finder<CORE> finder = Finder<CORE>::byCount(point, 1);
-				search(finder);
-				return finder.top();
-			}
-			
-			std::vector<DataType> nearest(const PointType& point, int count) const
-			{
-				Finder<CORE> finder = Finder<CORE>::byCount(point, count);
-				return find(finder);
-			}
-	
-			void remove(const DataType& data)
+			void remove(const Item& item)
 			{
 				for(int i = mItems.size() - 1; i >= 0; --i)
 				{
-					if(mItems[i] == data)
+					if(mItems[i] == item)
 					{
 						mItems[i] = mItems.back();
 						mItems.pop_back();
@@ -65,18 +40,20 @@ namespace KD
 				}
 			}
 			
-			void search(Finder<CORE>& finder) const
+			void search(const Point& point, Finder<Item, Coord>& finder) const
 			{
 				for(int i = mItems.size() - 1; i >= 0; --i)
 				{
-					finder.check(&mItems[i]);
+					Coord score(0);
+					for(int d = 0; d < CORE::DIMENSIONS; ++d)
+					{
+						Coord pc = CORE::coordinate(point, d);
+						Coord ic = CORE::coordinate(CORE::point(mItems[i]), d);
+						score += (pc - ic) * (pc - ic);
+					}
+					
+					finder.check(mItems[i], score);
 				}
-			}
-	
-			std::vector<DataType> within(const PointType& point, CoordType range) const
-			{
-				Finder<CORE> finder = Finder<CORE>::byRange(point, range);
-				return find(finder);
 			}
 		};
 	}
