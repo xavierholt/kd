@@ -29,7 +29,7 @@ public:
 	
 	Node<CORE>* insert(const Item& item)
 	{
-		if(mCount >= CORE::STORAGE)
+		if(mCount >= mCapacity)
 		{
 			mCapacity += CORE::STORAGE;
 			Item* temp = new Item[mCapacity];
@@ -79,4 +79,3 @@ public:
 		}
 	}
 };
-
