@@ -12,19 +12,19 @@ This is a minimal example, missing the necessary `#include`s and the boilerplate
 ```C++
 int main()
 {
-	typedef KD::Core<3, Point> CORE;
-	
-	Point min(0, 0, 0);
-	Point max(9, 9, 9);
-	KD::Tree<CORE> kdtree(min, max);
-	
-	kdtree.insert(Point(1, 2, 3));
-	kdtree.insert(Point(8, 2, 5));
-	kdtree.insert(Point(1, 0, 8));
-	kdtree.insert(Point(3, 1, 4));
-	
-	std::cout << kdtree.nearest(Point(5, 5, 5)) << std::endl;
-	return 0;
+  typedef KD::Core<3, Point> CORE;
+
+  Point min(0, 0, 0);
+  Point max(9, 9, 9);
+  KD::Tree<CORE> kdtree(min, max);
+
+  kdtree.insert(Point(1, 2, 3));
+  kdtree.insert(Point(8, 2, 5));
+  kdtree.insert(Point(1, 0, 8));
+  kdtree.insert(Point(3, 1, 4));
+
+  std::cout << kdtree.nearest(Point(5, 5, 5)) << std::endl;
+  return 0;
 }
 ```
 
@@ -33,7 +33,7 @@ int main()
 
 The KD-Tree exposes the following methods:
 
- - `void insert(const Item& datum)`  
+ - `void insert(const Item& item)`  
    Adds an item to the tree.
    
  - `std::vector<Item> find(const Point& point, int count, Coord radius)`  
@@ -49,7 +49,7 @@ The KD-Tree exposes the following methods:
  - `std::vector<Item> within(const Point& point, Coord radius)`  
    Returns all items within `radius` units of `point`.
    
- - `void remove(const Item& datum)`  
+ - `void remove(const Item& item)`  
    Removes an item from the tree.
 
 
@@ -74,25 +74,25 @@ members to fine-tune the tree's behaviour.  An annotated example:
 ```C++
 struct CORE
 {
-	typedef Thing* Item;  // The type we store in the tree.
-	typedef Point  Point; // The type we read coordinates from.
-	typedef float  Coord; // The type of individual coordinates.
-	
-	static const int DIMENSIONS =  3; // We're in a three-dimensional space.
-	static const int MAX_DEPTH  = 10; // The tree will reach at most ten levels.
-	static const int STORAGE    =  8; // Leaves can hold eight items before splitting.
-	
-	// Get the distance of a point along the given axis.
-	static Coord coordinate(const Point& point, int axis)
-	{
-		return point[axis];
-	}
-	
-	// Get the location of a datum.
-	static const Point& point(const Item& item)
-	{
-		return item->point();
-	}
+  typedef Thing* Item;  // The type we store in the tree.
+  typedef Point  Point; // The type we read coordinates from.
+  typedef float  Coord; // The type of individual coordinates.
+
+  static const int DIMENSIONS =  3; // We're in a three-dimensional space.
+  static const int MAX_DEPTH  = 10; // The tree will reach at most ten levels.
+  static const int STORAGE    =  8; // Leaves can hold eight items before splitting.
+
+  // Get the distance of a point along the given axis.
+  static Coord coordinate(const Point& point, int axis)
+  {
+    return point[axis];
+  }
+
+  // Get the location of an item
+  static const Point& point(const Item& item)
+  {
+    return item->point();
+  }
 };
 ```
 
@@ -104,12 +104,12 @@ template class equivalent to:
 
 ```C++
 template <
-    int   DIMENSIONS,
-    class Item,
-    class Point      = Item,
-    class Coord      = double,
-    int   STORAGE    = 8,
-    int   MAX_DEPTH  = 32
+  int   DIMENSIONS,
+  class Item,
+  class Point      = Item,
+  class Coord      = double,
+  int   STORAGE    = 8,
+  int   MAX_DEPTH  = 32
 > struct KD::Core {...};
 ```
 
@@ -154,5 +154,3 @@ nice simplifications:
  - Deletion is much simpler (and should be faster) for the same reason: removing
    an item doesn't affect the division of the space, so the tree doesn't need to
    be rebalanced.
-
-
