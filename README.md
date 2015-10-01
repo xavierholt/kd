@@ -7,7 +7,7 @@ A [KD-Tree](https://en.wikipedia.org/wiki/Kd-tree) in C++
 ## Quickstart
 
 This is a minimal example, missing the necessary `#include`s and the boilerplate
-`Point` class.  The full working example can be found at `test/quickstart.cpp`.
+`Point` class.  The full working example can be found at `test/example.cpp`.
 
 ```C++
 int main()
