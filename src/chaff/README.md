@@ -75,5 +75,9 @@ Once you have a Finder, there are a few things you can do with it:
  - `const S& MyFinder::score() const`  
    Get the _worst_ score that could still be added to the result set.
 
+ - `const T& MyFinder::thing() const`  
+   Get the _worst_ thing that is part of the result set.  Note that in
+   a Finder of size one, this also a way to get the _best_ thing.
+
  - `void MyFinder::clear()`  
    Reset the Finder to its initial state.

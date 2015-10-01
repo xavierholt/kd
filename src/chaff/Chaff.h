@@ -73,6 +73,10 @@ namespace Chaff
         }
       }
     }
+
+    const S& thing() const {
+      return mHeap.top().thing();
+    }
   };
 
   template <class T, class S>
