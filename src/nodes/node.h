@@ -99,7 +99,7 @@ public:
 	{
 		Finder finder = Finder::byCount(1);
 		search(point, finder);
-		return finder.top();
+		return finder.thing();
 	}
 	
 	std::vector<Item> nearest(const Point& point, int count) const
