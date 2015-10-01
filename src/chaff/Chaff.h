@@ -74,7 +74,7 @@ namespace Chaff
       }
     }
 
-    const S& thing() const {
+    const T& thing() const {
       return mHeap.top().thing();
     }
   };
