@@ -3,6 +3,7 @@ template <class CORE> class Twig : public Node<CORE>
 	typedef typename CORE::Item  Item;
 	typedef typename CORE::Point Point;
 	typedef typename CORE::Coord Coord;
+	typedef Chaff::MinFinder<Item,Coord> Finder;
 	
 	friend class Leaf<CORE>;
 	friend class Tree<CORE>;
@@ -64,12 +65,12 @@ public:
 		return this;
 	}
 	
-	void search(const Point& point, Finder<Item, Coord>& finder) const
+	void search(const Point& point, Finder& finder) const
 	{
 		for(int i = 0; i < mCount; ++i)
 		{
 			Coord score = this->score(point, mItems[i]);
-			finder.check(mItems[i], score);
+			finder.sow(mItems[i], score);
 		}
 	}
 };

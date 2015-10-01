@@ -3,6 +3,7 @@ template <class CORE> class Tree : public Node<CORE>
 	typedef typename CORE::Item  Item;
 	typedef typename CORE::Point Point;
 	typedef typename CORE::Coord Coord;
+	typedef Chaff::MinFinder<Item,Coord> Finder;
 	
 	friend class Leaf<CORE>;
 	friend class Twig<CORE>;
@@ -55,7 +56,7 @@ public:
 		return this;
 	}
 	
-	void search(const Point& point, Finder<Item, Coord>& finder) const
+	void search(const Point& point, Finder& finder) const
 	{
 		Coord diff = CORE::coordinate(point, this->mAxis) - this->mMidpoint;
 		int idx = (diff > 0);

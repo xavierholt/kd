@@ -2,7 +2,7 @@
 #define KD_TREE_H
 
 #include "core.h"
-#include "finder.h"
+#include "chaff/Chaff.h"
 
 namespace KD
 {

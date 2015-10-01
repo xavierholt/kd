@@ -4,7 +4,8 @@ protected:
 	typedef typename CORE::Item  Item;
 	typedef typename CORE::Point Point;
 	typedef typename CORE::Coord Coord;
-	
+	typedef Chaff::MinFinder<Item,Coord> Finder;
+
 protected:
 	const int mDepth;
 	const int mAxis;
@@ -81,9 +82,9 @@ public:
 	virtual Node* insert(const Item& item) = 0;
 	virtual Node* remove(const Item& item) = 0;
 	
-	virtual void  search(const Point& point, Finder<Item, Coord>& finder) const = 0;
+	virtual void  search(const Point& point, Finder& finder) const = 0;
 	
-	std::vector<Item> find(const Point& point, Finder<Item, Coord>& finder) const
+	std::vector<Item> find(const Point& point, Finder& finder) const
 	{
 		search(point, finder);
 		return finder.vector();
@@ -91,23 +92,23 @@ public:
 	
 	std::vector<Item> find(const Point& point, int count, Coord radius) const
 	{
-		return find(point, Finder<Item, Coord>(count, radius * radius));
+		return find(point, Finder(count, radius * radius));
 	}
 	
 	Item nearest(const Point& point) const
 	{
-		Finder<Item, Coord> finder = Finder<Item, Coord>::byCount(1);
+		Finder finder = Finder::byCount(1);
 		search(point, finder);
 		return finder.top();
 	}
 	
 	std::vector<Item> nearest(const Point& point, int count) const
 	{
-		return find(point, Finder<Item, Coord>::byCount(count));
+		return find(point, Finder::byCount(count));
 	}
 	
 	std::vector<Item> within(const Point& point, Coord radius) const
 	{
-		return find(point, Finder<Item, Coord>::byScore(radius * radius));
+		return find(point, Finder::byScore(radius * radius));
 	}
 };
