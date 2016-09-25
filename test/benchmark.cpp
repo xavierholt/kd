@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <ctime>
+#include <functional>
 
 typedef long long int NS;
 const NS NANO = 1000000000LL;
