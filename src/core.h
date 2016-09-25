@@ -3,7 +3,8 @@
 
 namespace KD
 {
-  template <int DIM, class DT, class PT, class CT, int STO, int DEP> struct CoreBase
+  template <int DIM, class DT, class PT, class CT, int STO, int DEP>
+  struct CoreBase
   {
     typedef DT Item;
     typedef PT Point;
