@@ -27,17 +27,19 @@ namespace Chaff
       }
     };
 
+  public:
     typedef typename std::priority_queue<Ranking> Heap;
+    typedef typename Heap::size_type Size;
 
   protected:
     Heap mHeap;
-    int  mMaxCount;
+    Size mMaxCount;
     S    mTopScore;
     S    mMaxScore;
     C    mCompare;
-  
+
   public:
-    Finder(int count, const S& score): mHeap() {
+    Finder(Size count, const S& score): mHeap() {
       mMaxCount = count;
       mTopScore = score;
       mMaxScore = score;
@@ -48,14 +50,19 @@ namespace Chaff
       mTopScore = mMaxScore;
     }
 
+    Size count() const {
+      return mHeap.size();
+    }
+
     std::vector<T> reap() {
       std::vector<T> results(mHeap.size());
-    
-      for(int i = mHeap.size() - 1; i >= 0; --i) {
-        results[i] = mHeap.top().thing();
+
+      Size i = mHeap.size();
+      while(i > 0) {
+        results[--i] = mHeap.top().thing();
         mHeap.pop();
       }
-    
+
       clear();
       return results;
     }
@@ -82,8 +89,10 @@ namespace Chaff
   template <class T, class S>
   class MaxFinder: public Finder<T, S, std::greater<S> > {
   public:
-    static MaxFinder byCount(int count)      {return MaxFinder(count, std::numeric_limits<S>::min());}
-    static MaxFinder byScore(const S& score) {return MaxFinder(std::numeric_limits<int>::max(), score);}
+    typedef typename Finder<T, S, std::greater<S> >::Size Size;
+  public:
+    static MaxFinder byCount(Size count)     {return MaxFinder(count, std::numeric_limits<S>::min());}
+    static MaxFinder byScore(const S& score) {return MaxFinder(std::numeric_limits<Size>::max(), score);}
   public:
     MaxFinder(int count, const S& score): Finder<T, S, std::greater<S> >(count, score) {}
   };
@@ -91,8 +100,10 @@ namespace Chaff
   template <class T, class S>
   class MinFinder: public Finder<T, S, std::less<S> > {
   public:
-    static MinFinder byCount(int count)      {return MinFinder(count, std::numeric_limits<S>::max());}
-    static MinFinder byScore(const S& score) {return MinFinder(std::numeric_limits<int>::max(), score);}
+    typedef typename Finder<T, S, std::greater<S> >::Size Size;
+  public:
+    static MinFinder byCount(Size count)     {return MinFinder(count, std::numeric_limits<S>::max());}
+    static MinFinder byScore(const S& score) {return MinFinder(std::numeric_limits<Size>::max(), score);}
   public:
     MinFinder(int count, const S& score): Finder<T, S, std::less<S> >(count, score) {}
   };
