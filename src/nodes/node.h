@@ -71,7 +71,7 @@ public:
 
   std::vector<Item> find(const Point& point, Finder& finder) const {
     search(point, finder);
-    return finder.vector();
+    return finder.reap();
   }
 
   std::vector<Item> find(const Point& point, int count, Coord radius) const {
