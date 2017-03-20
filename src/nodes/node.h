@@ -75,7 +75,8 @@ public:
   }
 
   std::vector<Item> find(const Point& point, int count, Coord radius) const {
-    return find(point, Finder(count, radius * radius));
+    Finder finder(count, radius * radius);
+    return find(point, finder);
   }
 
   Item nearest(const Point& point) const {
@@ -85,10 +86,12 @@ public:
   }
 
   std::vector<Item> nearest(const Point& point, int count) const {
-    return find(point, Finder::byCount(count));
+    Finder finder = Finder::byCount(count);
+    return find(point, finder);
   }
 
   std::vector<Item> within(const Point& point, Coord radius) const {
-    return find(point, Finder::byScore(radius * radius));
+    Finder finder = Finder::byScore(radius * radius);
+    return find(point, finder);
   }
 };
