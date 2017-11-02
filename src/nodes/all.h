@@ -7,18 +7,21 @@ template <typename CORE> class Twig;
 #include "leaf.h"
 #include "tree.h"
 #include "twig.h"
+#include "wrap.h"
 
 template <typename CORE>
 Node<CORE>* Tree<CORE>::insert(const typename CORE::Item& item) {
-  int c = child(CORE::point(item));
-  if(mNodes[c]) {
-    mNodes[c] = mNodes[c]->insert(item);
+  const Coord c = CORE::coordinate(CORE::point(item), this->mAxis);
+  const int   i = (c > this->mMidpoint);
+
+  if(mNodes[i]) {
+    mNodes[i] = mNodes[i]->insert(item);
   }
   else if(this->mDepth + 1 < CORE::MAX_DEPTH) {
-    mNodes[c] = new Twig<CORE>(this, item);
+    mNodes[i] = new Twig<CORE>(this, item);
   }
   else {
-    mNodes[c] = new Leaf<CORE>(this, item);
+    mNodes[i] = new Leaf<CORE>(this, item);
   }
 
   return this;

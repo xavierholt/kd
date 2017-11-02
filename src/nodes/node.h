@@ -39,7 +39,7 @@ protected:
     mMidpoint = (mMinima[mAxis] + mMaxima[mAxis]) / 2;
   }
 
-  Node(const Point& min, const Point& max): mDepth(0), mAxis(0) {
+  Node(const Point& min, const Point& max, int depth = 0): mDepth(depth), mAxis(depth % CORE::DIMENSIONS) {
     for(int i = 0; i < CORE::DIMENSIONS; ++i) {
       mMinima[i] = CORE::coordinate(min, i);
       mMaxima[i] = CORE::coordinate(max, i);
