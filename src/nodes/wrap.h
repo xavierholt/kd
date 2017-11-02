@@ -58,12 +58,12 @@ public:
     mChild->search(scratch, finder);
 
     if(finder.score() > val - min) {
-      scratch[this->mAxis] = val - rng;
+      scratch[this->mAxis] = val + rng;
       mChild->search(scratch, finder);
     }
 
     if(finder.score() > max - val) {
-      scratch[this->mAxis] = val + rng;
+      scratch[this->mAxis] = val - rng;
       mChild->search(scratch, finder);
     }
   }
