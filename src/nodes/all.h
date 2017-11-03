@@ -2,6 +2,7 @@ template <typename CORE> class Node;
 template <typename CORE> class Leaf;
 template <typename CORE> class Tree;
 template <typename CORE> class Twig;
+template <typename CORE> class Wrap;
 
 #include "node.h"
 #include "leaf.h"

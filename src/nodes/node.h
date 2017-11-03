@@ -59,6 +59,11 @@ protected:
     return result;
   }
 
+  virtual Leaf<CORE>* asLeaf() {return 0;}
+  virtual Tree<CORE>* asTree() {return 0;}
+  virtual Twig<CORE>* asTwig() {return 0;}
+  virtual Wrap<CORE>* asWrap() {return 0;}
+
 public:
   virtual ~Node() {
     // Nothing to do.

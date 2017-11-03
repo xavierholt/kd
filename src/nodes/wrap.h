@@ -18,9 +18,14 @@ protected:
     }
   }
 
-  static Coord mod(Coord num, Coord dnm) {
-    int n = num / dnm - (num < 0);
-    return num - n * dnm;
+  Wrap* asWrap() {
+    return this;
+  }
+
+  template <class T>
+  static T mod(T num, T dnm) {
+    num -= int(num / dnm) * dnm;
+    return num + dnm * (num < 0);
   }
 
 public:

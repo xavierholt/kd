@@ -17,6 +17,10 @@ protected:
     mNodes[1] = 0;
   }
 
+  Tree* asTree() {
+    return this;
+  }
+
 public:
   Tree(const Point& min, const Point& max): Node<CORE>(min, max) {
     mNodes[0] = 0;

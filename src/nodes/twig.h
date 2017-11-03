@@ -18,6 +18,10 @@ protected:
     mItems[0] = item;
   }
 
+  Twig* asTwig() {
+    return this;
+  }
+
 public:
   Node<CORE>* insert(const Item& item) {
     if(mCount >= CORE::STORAGE) {
