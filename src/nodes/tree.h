@@ -17,8 +17,8 @@ protected:
     mNodes[1] = 0;
   }
 
-  int child(const Point& point) const {
-    return (CORE::coordinate(point, this->mAxis) > this->mMidpoint);
+  Tree* asTree() {
+    return this;
   }
 
 public:
@@ -37,9 +37,11 @@ public:
   Node<CORE>* insert(const Item& item);
 
   Node<CORE>* remove(const Item& item) {
-    int c = child(CORE::point(item));
-    if(mNodes[c]) {
-      mNodes[c] = mNodes[c]->remove(item);
+    const Coord c = CORE::coordinate(CORE::point(item), this->mAxis);
+    const int   i = (c > this->mMidpoint);
+
+    if(mNodes[i]) {
+      mNodes[i] = mNodes[i]->remove(item);
       if(mNodes[0] == 0 && mNodes[1] == 0 && this->mDepth != 0) {
         delete this;
         return 0;
@@ -50,15 +52,15 @@ public:
   }
 
   void search(const Point& point, Finder& finder) const {
-    Coord diff = CORE::coordinate(point, this->mAxis) - this->mMidpoint;
-    int idx = (diff > 0);
+    const Coord d = CORE::coordinate(point, this->mAxis) - this->mMidpoint;
+    const int   i = (d > 0);
 
-    if(mNodes[idx]) {
-      mNodes[idx]->search(point, finder);
+    if(mNodes[i]) {
+      mNodes[i]->search(point, finder);
     }
 
-    if(diff * diff < finder.score() && mNodes[idx ^ 1]) {
-      mNodes[idx ^ 1]->search(point, finder);
+    if(d * d < finder.score() && mNodes[i ^ 1]) {
+      mNodes[i ^ 1]->search(point, finder);
     }
   }
 };

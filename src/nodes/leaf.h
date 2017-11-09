@@ -21,6 +21,10 @@ protected:
     mItems[0] = item;
   }
 
+  Leaf* asLeaf() {
+    return this;
+  }
+
 public:
   ~Leaf() {
     delete [] mItems;
